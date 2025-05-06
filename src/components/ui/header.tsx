@@ -1,156 +1,75 @@
-"use client";
-
+import { auth } from "~/server/auth";
 import { Button } from "./button";
 import {
-NavigationMenu,
-NavigationMenuContent,
-NavigationMenuItem,
-NavigationMenuLink,
-NavigationMenuList,
-NavigationMenuTrigger,
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
 } from "./navigation-menu";
-import { Menu, MoveRight, X } from "lucide-react";
-import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import Link from "next/link";
 
-export const Header = () => {
-const navigationItems = [
-    {
-    title: "Home",
-    href: "/",
-    description: "",
-    },
-    {
-    title: "Courses",
-    href: "/courses",
-    description: "",
-    },
-    {
-    title: "Company",
-    description: "Managing a small business today is already tough.",
-    items: [
-        {
-        title: "About us",
-        href: "/about",
-        },
-        {
-        title: "Fundraising",
-        href: "/fundraising",
-        },
-        {
-        title: "Investors",
-        href: "/investors",
-        },
-        {
-        title: "Contact us",
-        href: "/contact",
-        },
-    ],
-    },
-];
+export const Header = async () => {
+  const session = await auth();
 
-const [isOpen, setOpen] = useState(false);
-return (
-    <header className="w-full z-40 fixed top-0 left-0 bg-background border-b">
-    <div className="container relative mx-auto min-h-14 flex gap-4 flex-row lg:grid lg:grid-cols-3 items-center">
-        <div className="justify-start items-center gap-4 lg:flex hidden flex-row">
-        <NavigationMenu className="flex justify-start items-start">
-            <NavigationMenuList className="flex justify-start gap-4 flex-row">
-            {navigationItems.map((item) => (
+  const navigationItems = [
+    {
+      title: "Home",
+      href: "/",
+      description: "",
+    },
+    {
+      title: "Courses",
+      href: "/courses",
+      description: "",
+    },
+  ];
+
+  return (
+    <header className="bg-background fixed top-0 left-0 z-40 w-full border-b">
+      <div className="relative container mx-auto flex min-h-14 flex-row items-center gap-4 lg:grid lg:grid-cols-3">
+        <div className="flex-row items-center justify-start gap-4 lg:flex">
+          <NavigationMenu className="flex items-start justify-start">
+            <NavigationMenuList className="flex flex-row justify-start gap-4">
+              {navigationItems.map((item) => (
                 <NavigationMenuItem key={item.title}>
-                {item.href ? (
-                    <>
-                    <NavigationMenuLink>
-                        <Button variant="ghost">{item.title}</Button>
-                    </NavigationMenuLink>
-                    </>
-                ) : (
-                    <>
-                    <NavigationMenuTrigger className="font-medium text-sm">
+                  <>
+                    <NavigationMenuLink href={item.href}>
+                      <Button className="cursor-pointer" variant="ghost">
                         {item.title}
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent className="!w-[450px] p-4">
-                        <div className="flex flex-col lg:grid grid-cols-2 gap-4">
-                        <div className="flex flex-col h-full justify-between">
-                            <div className="flex flex-col">
-                            <p className="text-base">{item.title}</p>
-                            <p className="text-muted-foreground text-sm">
-                                {item.description}
-                            </p>
-                            </div>
-                        </div>
-                        <div className="flex flex-col text-sm h-full justify-end">
-                            {item.items?.map((subItem) => (
-                            <NavigationMenuLink
-                                href={subItem.href}
-                                key={subItem.title}
-                                className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
-                            >
-                                <span>{subItem.title}</span>
-                                <MoveRight className="w-4 h-4 text-muted-foreground" />
-                            </NavigationMenuLink>
-                            ))}
-                        </div>
-                        </div>
-                    </NavigationMenuContent>
-                    </>
-                )}
+                      </Button>
+                    </NavigationMenuLink>
+                  </>
                 </NavigationMenuItem>
-            ))}
+              ))}
             </NavigationMenuList>
-        </NavigationMenu>
+          </NavigationMenu>
         </div>
         <div className="flex lg:justify-center">
-        <p className="font-semibold">Public Notes</p>
+          <p className="font-semibold">Public Notes</p>
         </div>
-        <div className="flex justify-end w-full gap-4">
-        <Button variant="ghost" className="hidden md:inline">
-            Book a demo
-        </Button>
-        <div className="border-r hidden md:inline"></div>
-        <Button variant="outline">Sign in</Button>
-        <Button>Get started</Button>
+        <div className="flex w-full justify-end gap-4">
+          <Button variant="ghost" className="cursor-pointer md:inline">
+            My Notes
+          </Button>
+          <div className="hidden border-r md:inline"></div>
+          {session ? (
+            <Avatar className="cursor-pointer">
+              {session.user.image ? (
+                <AvatarImage src={session.user.image} />
+              ) : (
+                <AvatarFallback>{session.user.name?.charAt(0)}</AvatarFallback>
+              )}
+            </Avatar>
+          ) : (
+            <Link href="/api/auth/signin">
+              <Button className="cursor-pointer">Sign In</Button>
+            </Link>
+          )}
         </div>
-        <div className="flex w-12 shrink lg:hidden items-end justify-end">
-        <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
-            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </Button>
-        {isOpen && (
-            <div className="absolute top-14 border-t flex flex-col w-full right-0 bg-background shadow-lg py-4 container gap-8">
-            {navigationItems.map((item) => (
-                <div key={item.title}>
-                <div className="flex flex-col gap-2">
-                    {item.href ? (
-                    <Link
-                        href={item.href}
-                        className="flex justify-between items-center"
-                    >
-                        <span className="text-lg">{item.title}</span>
-                        <MoveRight className="w-4 h-4 stroke-1 text-muted-foreground" />
-                    </Link>
-                    ) : (
-                    <p className="text-lg">{item.title}</p>
-                    )}
-                    {item.items &&
-                    item.items.map((subItem) => (
-                        <Link
-                        key={subItem.title}
-                        href={subItem.href}
-                        className="flex justify-between items-center"
-                        >
-                        <span className="text-muted-foreground">
-                            {subItem.title}
-                        </span>
-                        <MoveRight className="w-4 h-4 stroke-1" />
-                        </Link>
-                    ))}
-                </div>
-                </div>
-            ))}
-            </div>
-        )}
-        </div>
-    </div>
+      </div>
     </header>
-);
+  );
 };
