@@ -9,6 +9,14 @@ import {
   NavigationMenuTrigger,
 } from "./navigation-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import Link from "next/link";
 
 export const Header = async () => {
@@ -55,14 +63,35 @@ export const Header = async () => {
             My Notes
           </Button>
           <div className="hidden border-r md:inline"></div>
+
           {session ? (
-            <Avatar className="cursor-pointer">
-              {session.user.image ? (
-                <AvatarImage src={session.user.image} />
-              ) : (
-                <AvatarFallback>{session.user.name?.charAt(0)}</AvatarFallback>
-              )}
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Avatar className="cursor-pointer">
+                  {session.user.image ? (
+                    <AvatarImage src={session.user.image} />
+                  ) : (
+                    <AvatarFallback>
+                      {session.user.name?.charAt(0)}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <Link href="/admin">
+                  <DropdownMenuItem className="cursor-pointer">
+                    Admin
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/api/auth/signout">
+                  <DropdownMenuItem className="cursor-pointer">
+                    Log Out
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Link href="/api/auth/signin">
               <Button className="cursor-pointer">Sign In</Button>
