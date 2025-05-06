@@ -4,15 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 
 import { motion } from "framer-motion";
 
-import { MoveRight, PhoneCall } from "lucide-react";
+import { MoveRight, Upload } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import Link from "next/link";
 
 export const Hero = () => {
   const [titleNumber, setTitleNumber] = useState(0);
-  const titles = useMemo(
-    () => ["Computer Science", "Math", "Physics",],
-    []
-  );
+  const titles = useMemo(() => ["Computer Science", "Math", "Physics"], []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -28,11 +26,11 @@ export const Hero = () => {
   return (
     <div className="w-full">
       <div className="container mx-auto">
-        <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
-          <div className="flex gap-4 flex-col">
-            <h1 className="text-5xl md:text-7xl max-w-2xl tracking-tighter text-center font-regular">
+        <div className="flex flex-col items-center justify-center gap-8 py-20 lg:py-40">
+          <div className="flex flex-col gap-4">
+            <h1 className="font-regular max-w-2xl text-center text-5xl tracking-tighter md:text-7xl">
               <span className="text-spektr-cyan-50">Upload your Notes</span>
-              <span className="relative flex w-full justify-center overflow-hidden text-center md:pb-4 md:pt-1">
+              <span className="relative flex w-full justify-center overflow-hidden text-center md:pt-1 md:pb-4">
                 &nbsp;
                 {titles.map((title, index) => (
                   <motion.span
@@ -58,16 +56,24 @@ export const Hero = () => {
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-2xl text-center">
-            {"Organizing your notes shouldn't be hard — and sharing them shouldn't be a hassle. Upload your notes, discover what others are sharing, and learn together."}
+            <p className="text-muted-foreground max-w-2xl text-center text-lg leading-relaxed tracking-tight md:text-xl">
+              {
+                "Organizing your notes shouldn't be hard — and sharing them shouldn't be a hassle. Upload your notes, discover what others are sharing, and learn together."
+              }
             </p>
           </div>
           <div className="flex flex-row gap-3">
-            <Button size="lg" className="gap-4" variant="outline">
-              Jump on a call <PhoneCall className="w-4 h-4" />
-            </Button>
-            <Button size="lg" className="gap-4">
-              Sign up here <MoveRight className="w-4 h-4" />
+            <Link href="/courses">
+              <Button
+                size="lg"
+                className="cursor-pointer gap-4"
+                variant="outline"
+              >
+                Check Out Courses
+              </Button>
+            </Link>
+            <Button size="lg" className="cursor-pointer gap-4">
+              Upload Notes <Upload className="h-4 w-4" />
             </Button>
           </div>
         </div>
