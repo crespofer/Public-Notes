@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { motion } from "framer-motion";
 
-import { MoveRight, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 
@@ -69,7 +69,7 @@ export const Hero = () => {
                 className="cursor-pointer gap-4"
                 variant="outline"
               >
-                Check Out Courses
+                View Courses
               </Button>
             </Link>
             <Button size="lg" className="cursor-pointer gap-4">
