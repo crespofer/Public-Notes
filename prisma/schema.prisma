@@ -89,10 +89,11 @@ model Note {
 }
 
 model Course {
-  id       String @id @default(cuid())
-  name     String @unique // Calculus 2
-  code     String @unique // MAC2312
-  count    Int    @default(0)
+  id       String  @id @default(cuid())
+  name     String  @unique // Calculus 2
+  code     String  @unique // MAC2312
+  url      String
+  count    Int     @default(0)
   pending  Boolean @default(true)
   notes    Note[]
 }
