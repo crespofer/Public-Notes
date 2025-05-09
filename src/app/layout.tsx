@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { Header } from "~/components/ui/header";
+import { Toaster } from "~/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Public Notes",
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <Header />
+        <Toaster position="bottom-right" richColors/>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
