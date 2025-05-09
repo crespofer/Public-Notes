@@ -1,69 +1,101 @@
+"use client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "~/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 
-export default function RequestCourse() {
-    return (
-      <main className="max-w-3xl mx-auto px-4 py-8 pt-14">
-        {/* Page Title */}
-        <h1 className="text-3xl font-bold mb-6">Request a New Course</h1>
-  
-        {/* Instructions */}
-        <p className="text-gray-700 mb-4">
-          Please fill out the form below to request a new course. Our team will review your submission and add it to the list if approved.
-        </p>
-  
-        {/* Form */}
-        <form className="space-y-4">
-          {/* Course Name */}
-          <div>
-            <label htmlFor="courseName" className="block text-sm font-medium text-gray-700">
-              Course Name
-            </label>
-            <input
-              type="text"
-              id="courseName"
-              name="courseName"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="e.g., Calculus II"
-              required
-            />
+const formSchema = z.object({
+  courseName: z.string().min(1).min(10).max(60),
+  coursePrefix: z.string().min(1).min(3).max(3),
+  courseCode: z.string().min(1).min(4).max(4),
+});
+
+export default function RequestCourses() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {console.log(values)}
+
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-8 pt-15">
+      <h1 className="mb-6 text-3xl font-bold">Request to add a Course</h1>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="mx-auto max-w-3xl space-y-8 py-10"
+        >
+          <FormField
+            control={form.control}
+            name="courseName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Course Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Computer Science 1"
+                    type="text"
+                    {...field}
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-12 gap-4">
+            <div className="col-span-6">
+              <FormField
+                control={form.control}
+                name="coursePrefix"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course Prefix</FormLabel>
+                    <FormControl>
+                      <Input placeholder="COP" type="text" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This should be the three letters
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="col-span-6">
+              <FormField
+                control={form.control}
+                name="courseCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="3502" type="text" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This should be the numbers following the course prefix
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
-  
-          {/* Course Code */}
-          <div>
-            <label htmlFor="courseCode" className="block text-sm font-medium text-gray-700">
-              Course Code
-            </label>
-            <input
-              type="text"
-              id="courseCode"
-              name="courseCode"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="e.g., MATH102"
-              required
-            />
-          </div>
-  
-          {/* Course Description */}
-          <div>
-            <label htmlFor="courseDescription" className="block text-sm font-medium text-gray-700">
-              Course Description
-            </label>
-            <textarea
-              id="courseDescription"
-              name="courseDescription"
-              rows={4}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Provide a brief description of the course."
-            />
-          </div>
-  
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
-          >
-            Submit Request
-          </button>
+          <Button className="cursor-pointer" type="submit">Submit</Button>
         </form>
-      </main>
-    );
-  }
+      </Form>
+    </main>
+  );
+}
