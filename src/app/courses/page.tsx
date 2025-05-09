@@ -33,7 +33,7 @@ const courses = [
 
 export default function CoursesPage() {
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8 pt-14">
+    <main className="max-w-7xl mx-auto px-4 py-8 pt-15">
       <h1 className="text-3xl font-bold mb-6">Courses</h1>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
