@@ -14,6 +14,8 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 
+import { api } from "~/trpc/react";
+
 const formSchema = z.object({
   courseName: z.string().min(1).min(10).max(60),
   coursePrefix: z.string().min(1).min(3).max(3),
@@ -24,8 +26,19 @@ export default function RequestCourses() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+  const createCourse = api.course.requestCourse.useMutation({
+    onSuccess: () => {console.log("Course Created")},
+    onError: () => {console.log("Something went wrong")}
+  });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {console.log(values)}
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const capitalPrefix = values.coursePrefix.toUpperCase();
+    createCourse.mutate({
+      name: values.courseName,
+      prefix: capitalPrefix,
+      code: values.courseCode,
+       })
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 pt-15">
