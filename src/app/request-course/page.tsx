@@ -13,8 +13,11 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner"
 
 import { api } from "~/trpc/react";
+import { useState } from "react";
 
 const formSchema = z.object({
   courseName: z.string().min(1).min(10).max(60),
@@ -23,12 +26,29 @@ const formSchema = z.object({
 });
 
 export default function RequestCourses() {
+  const [message, setMessage] = useState<null | String>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
   const createCourse = api.course.requestCourse.useMutation({
-    onSuccess: () => {console.log("Course Created")},
-    onError: () => {console.log("Something went wrong")}
+    onSuccess: (result) => {
+      if (result.message) {
+        setMessage(result.message);
+      } else if (result.newCourse) {
+        toast.success(`${result.newCourse.code} successfully requested`)
+      }
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      console.error(error.message, error.data);
+    },
+    onSettled: () => {
+      form.reset({
+      courseName: "",
+      courseCode: "",
+      coursePrefix: "",
+    })}
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -37,7 +57,7 @@ export default function RequestCourses() {
       name: values.courseName,
       prefix: capitalPrefix,
       code: values.courseCode,
-       })
+    });
   }
 
   return (
@@ -106,7 +126,17 @@ export default function RequestCourses() {
               />
             </div>
           </div>
-          <Button className="cursor-pointer" type="submit">Submit</Button>
+          {createCourse.isPending ? (
+            <Button disabled>
+              <Loader2 className="animate-spin" />
+              Loading
+            </Button>
+          ) : (
+            <Button className="cursor-pointer" type="submit">
+              Submit
+            </Button>
+          )}
+          {message && <p className="text-red-600">{message}</p>}
         </form>
       </Form>
     </main>
