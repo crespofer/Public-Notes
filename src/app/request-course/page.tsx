@@ -26,7 +26,7 @@ const formSchema = z.object({
 });
 
 export default function RequestCourses() {
-  const [message, setMessage] = useState<null | String>(null);
+  const [message, setMessage] = useState<null | string>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
