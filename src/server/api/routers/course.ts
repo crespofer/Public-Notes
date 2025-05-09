@@ -1,4 +1,3 @@
-import { Code } from "lucide-react";
 import { z } from "zod";
 
 import {
@@ -21,22 +20,38 @@ export const courseRouter = createTRPCRouter({
             }
         })
 
+        // a new course request
         if(course === null) {
-            return ctx.db.course.create({
+            const createdCourse = await ctx.db.course.create({
                 data: {
                     name: input.name,
                     code: fullCode,
                 }
             })
-        } else {
-            return ctx.db.course.update({
+            return {
+                message: null,
+                newCourse: createdCourse,
+            }
+        } else if(course && course.pending === false) { // course already exists
+            return {
+                message: "Course already exists",
+                newCourse: null,
+            }
+
+        } else { // course is awaiting review, add new request
+            const newCount = course.count + 1;
+            const createdCourse = await ctx.db.course.update({
                 where: {
                     code: fullCode,
                 },
                 data: {
-                    count: course.count + 1,
+                    count: newCount,
                 },
             })
+            return {
+                message: null,
+                newCourse: createdCourse,
+            }
         }
 
     }),
