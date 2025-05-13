@@ -1,0 +1,1 @@
+export const adminIds = new Set([process.env.ADMIN_FER])
