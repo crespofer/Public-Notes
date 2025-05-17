@@ -14,5 +14,15 @@ export const adminRouter = createTRPCRouter({
           },
         });
         return courses;
-    })
+    }),
+
+    getAllPendingCourses: adminProcedure
+    .query(async ({ ctx }) => {
+      const courses = await ctx.db.course.findMany({
+        where: {
+          pending: true,
+        },
+      });
+      return courses;
+    }),
 })
