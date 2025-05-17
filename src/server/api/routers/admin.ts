@@ -6,9 +6,13 @@ import {
 } from "~/server/api/trpc";
 
 export const adminRouter = createTRPCRouter({
-    getAllCourses: adminProcedure
+    getAllApprovedCourses: adminProcedure
     .query(async ({ ctx }) => {
-        const courses = await ctx.db.course.findMany();
+        const courses = await ctx.db.course.findMany({
+          where: {
+            pending: false,
+          },
+        });
         return courses;
     })
 })
