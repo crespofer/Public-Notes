@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "~/trpc/react";
 
 type Course = {
   id: string;
@@ -15,12 +16,6 @@ type RequestedCourse = Course & {
 const ITEMS_PER_PAGE = 10;
 
 // Sample data
-const requestedCourses: RequestedCourse[] = Array.from({ length: 23 }, (_, i) => ({
-  id: `req-${i}`,
-  name: `Requested Course ${i + 1}`,
-  code: `REQ${100 + i}`,
-  requestCount: Math.floor(Math.random() * 10) + 1,
-}));
 
 const approvedCourses: Course[] = Array.from({ length: 18 }, (_, i) => ({
   id: `app-${i}`,
@@ -32,6 +27,8 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState<"requested" | "approved">("requested");
   const [requestedPage, setRequestedPage] = useState(1);
   const [approvedPage, setApprovedPage] = useState(1);
+
+  const {data: pendingCourses, isLoading, error } = api.admin.getAllPendingCourses.useQuery();
 
   const handleApprove = (id: string) => {
     console.log("Approved:", id);
@@ -70,14 +67,14 @@ export default function AdminDashboard() {
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py- pt-15">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+    <main className="py- mx-auto max-w-6xl px-4 pt-15">
+      <h1 className="mb-6 text-2xl font-bold">Admin Dashboard</h1>
 
       {/* Tabs */}
       <div className="mb-6 flex space-x-4">
         <button
           onClick={() => setTab("requested")}
-          className={`cursor-pointer px-4 py-2 rounded ${
+          className={`cursor-pointer rounded px-4 py-2 ${
             tab === "requested" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
         >
@@ -85,7 +82,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setTab("approved")}
-          className={`cursor-pointer px-4 py-2 rounded ${
+          className={`cursor-pointer rounded px-4 py-2 ${
             tab === "approved" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
         >
@@ -95,56 +92,70 @@ export default function AdminDashboard() {
 
       {/* Requested Courses */}
       {tab === "requested" && (
-        <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="text-left px-4 py-2">Name</th>
-                  <th className="text-left px-4 py-2">Code</th>
-                  <th className="text-left px-4 py-2">Requests</th>
-                  <th className="text-left px-4 py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginate(requestedCourses, requestedPage).map((course) => (
-                  <tr key={course.id} className="border-t">
-                    <td className="px-4 py-2">{course.name}</td>
-                    <td className="px-4 py-2">{course.code}</td>
-                    <td className="px-4 py-2">{course.requestCount}</td>
-                    <td className="px-4 py-2 space-x-2">
-                      <button
-                        onClick={() => handleApprove(course.id)}
-                        className="cursor-pointer bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleDeny(course.id)}
-                        className="cursor-pointer bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      >
-                        Deny
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {renderPagination(requestedCourses.length, requestedPage, setRequestedPage)}
-        </>
-      )}
+  <>
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="text-left px-4 py-2">Name</th>
+            <th className="text-left px-4 py-2">Code</th>
+            <th className="text-left px-4 py-2">Requests</th>
+            <th className="text-left px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {isLoading ? (
+            <tr>
+              <td colSpan={4} className="text-center py-4">Loading...</td>
+            </tr>
+          ) : error ? (
+            <tr>
+              <td colSpan={4} className="text-center py-4 text-red-500">Error loading courses</td>
+            </tr>
+          ) : pendingCourses && pendingCourses.length > 0 ? (
+            paginate(pendingCourses, requestedPage).map((course) => (
+              <tr key={course.id} className="border-t">
+                <td className="px-4 py-2">{course.name}</td>
+                <td className="px-4 py-2">{course.code.replace(/^([A-Z]{3})(\d{4})$/, "$1 $2")}</td>
+                <td className="px-4 py-2">{course.count}</td>
+                <td className="px-4 py-2 space-x-2">
+                  <button
+                    onClick={() => handleApprove(course.id)}
+                    className="cursor-pointer bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleDeny(course.id)}
+                    className="cursor-pointer bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Deny
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="text-center py-4">No pending courses</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+    {pendingCourses && renderPagination(pendingCourses.length, requestedPage, setRequestedPage)}
+  </>
+)}
 
       {/* Approved Courses */}
       {tab === "approved" && (
         <>
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+            <table className="min-w-full rounded-lg border border-gray-200 bg-white shadow">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="text-left px-4 py-2">Name</th>
-                  <th className="text-left px-4 py-2">Code</th>
-                  <th className="text-left px-4 py-2">Actions</th>
+                  <th className="px-4 py-2 text-left">Name</th>
+                  <th className="px-4 py-2 text-left">Code</th>
+                  <th className="px-4 py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,7 +166,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-2">
                       <button
                         onClick={() => handleEdit(course.id)}
-                        className="cursor-pointer bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                        className="cursor-pointer rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
                       >
                         Edit
                       </button>
@@ -165,7 +176,11 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-          {renderPagination(approvedCourses.length, approvedPage, setApprovedPage)}
+          {renderPagination(
+            approvedCourses.length,
+            approvedPage,
+            setApprovedPage,
+          )}
         </>
       )}
     </main>
