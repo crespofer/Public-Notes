@@ -28,7 +28,18 @@ export default function AdminDashboard() {
   const [requestedPage, setRequestedPage] = useState(1);
   const [approvedPage, setApprovedPage] = useState(1);
 
-  const {data: pendingCourses, isLoading, error } = api.admin.getAllPendingCourses.useQuery();
+  const {
+    data: approvedCourses,
+    isLoading: approvedCoursesLoading, 
+    error: approvedCourseserror, 
+    refetch: refetchApprovedCourses
+    } = api.admin.getAllApprovedCourses.useQuery();
+  const {
+    data: pendingCourses, 
+    isLoading: pendingCoursesLoading, 
+    error: pendingCourseserror, 
+    refetch: refetchPendingCourses
+    } = api.admin.getAllPendingCourses.useQuery();
 
   const handleApprove = (id: string) => {
     console.log("Approved:", id);
@@ -92,59 +103,72 @@ export default function AdminDashboard() {
 
       {/* Requested Courses */}
       {tab === "requested" && (
-  <>
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="text-left px-4 py-2">Name</th>
-            <th className="text-left px-4 py-2">Code</th>
-            <th className="text-left px-4 py-2">Requests</th>
-            <th className="text-left px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {isLoading ? (
-            <tr>
-              <td colSpan={4} className="text-center py-4">Loading...</td>
-            </tr>
-          ) : error ? (
-            <tr>
-              <td colSpan={4} className="text-center py-4 text-red-500">Error loading courses</td>
-            </tr>
-          ) : pendingCourses && pendingCourses.length > 0 ? (
-            paginate(pendingCourses, requestedPage).map((course) => (
-              <tr key={course.id} className="border-t">
-                <td className="px-4 py-2">{course.name}</td>
-                <td className="px-4 py-2">{course.code.replace(/^([A-Z]{3})(\d{4})$/, "$1 $2")}</td>
-                <td className="px-4 py-2">{course.count}</td>
-                <td className="px-4 py-2 space-x-2">
-                  <button
-                    onClick={() => handleApprove(course.id)}
-                    className="cursor-pointer bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => handleDeny(course.id)}
-                    className="cursor-pointer bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Deny
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={4} className="text-center py-4">No pending courses</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-    {pendingCourses && renderPagination(pendingCourses.length, requestedPage, setRequestedPage)}
-  </>
-)}
+        <>
+          <div className="overflow-x-auto">
+            <table className="min-w-full rounded-lg border border-gray-200 bg-white shadow">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-2 text-left">Name</th>
+                  <th className="px-4 py-2 text-left">Code</th>
+                  <th className="px-4 py-2 text-left">Requests</th>
+                  <th className="px-4 py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingCoursesLoading ? (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center">
+                      Loading...
+                    </td>
+                  </tr>
+                ) : pendingCourseserror ? (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center text-red-500">
+                      Error loading courses
+                    </td>
+                  </tr>
+                ) : pendingCourses && pendingCourses.length > 0 ? (
+                  paginate(pendingCourses, requestedPage).map((course) => (
+                    <tr key={course.id} className="border-t">
+                      <td className="px-4 py-2">{course.name}</td>
+                      <td className="px-4 py-2">
+                        {course.code.replace(/^([A-Z]{3})(\d{4})$/, "$1 $2")}
+                      </td>
+                      <td className="px-4 py-2">{course.count}</td>
+                      <td className="space-x-2 px-4 py-2">
+                        <button
+                          onClick={() => handleApprove(course.id)}
+                          className="cursor-pointer rounded bg-green-500 px-3 py-1 text-white hover:bg-green-600"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleDeny(course.id)}
+                          className="cursor-pointer rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+                        >
+                          Deny
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center">
+                      No pending courses
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {pendingCourses &&
+            renderPagination(
+              pendingCourses.length,
+              requestedPage,
+              setRequestedPage,
+            )}
+        </>
+      )}
 
       {/* Approved Courses */}
       {tab === "approved" && (
@@ -159,28 +183,49 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {paginate(approvedCourses, approvedPage).map((course) => (
-                  <tr key={course.id} className="border-t">
-                    <td className="px-4 py-2">{course.name}</td>
-                    <td className="px-4 py-2">{course.code}</td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => handleEdit(course.id)}
-                        className="cursor-pointer rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
-                      >
-                        Edit
-                      </button>
+                {approvedCoursesLoading ? (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center">
+                      Loading...
                     </td>
                   </tr>
-                ))}
+                ) : approvedCourseserror ? (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center text-red-500">
+                      Error loading courses
+                    </td>
+                  </tr>
+                ) : approvedCourses && approvedCourses.length > 0 ? (
+                  paginate(approvedCourses, approvedPage).map((course) => (
+                    <tr key={course.id} className="border-t">
+                      <td className="px-4 py-2">{course.name}</td>
+                      <td className="px-4 py-2">{course.code.replace(/^([A-Z]{3})(\d{4})$/, "$1 $2")}</td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={() => handleEdit(course.id)}
+                          className="cursor-pointer rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center">
+                      No Approved Courses
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-          {renderPagination(
-            approvedCourses.length,
-            approvedPage,
-            setApprovedPage,
-          )}
+          {approvedCourses &&
+            renderPagination(
+              approvedCourses.length,
+              approvedPage,
+              setApprovedPage,
+            )}
         </>
       )}
     </main>
