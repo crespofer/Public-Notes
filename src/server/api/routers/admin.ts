@@ -20,4 +20,13 @@ export const adminRouter = createTRPCRouter({
     });
     return courses;
   }),
+
+  denyCourse: adminProcedure
+    .input(z.object({courseId: z.string()}))
+    .mutation(async ({ctx, input}) => {
+      const deniedCourse = await ctx.db.course.delete({
+        where: {id: input.courseId},
+      })
+      return deniedCourse;
+    })
 });
