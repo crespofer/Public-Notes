@@ -1,10 +1,27 @@
+import ApprovedCourseTable from "./ApprovedCourseTable";
+import PendingCourseTable from "./PendingCourseTable";
 
-export default function Admin() {
-    
-    return (
-        <div className="pt-14">
-            Admin Page
-        </div>
-    )
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 
+export default function AdminDashboard() {
+  
+  return (
+    <main className="py- mx-auto max-w-6xl px-4 pt-15">
+      <h1 className="mb-6 text-2xl font-bold">Admin Dashboard</h1>
+
+      <Tabs defaultValue="pending" className="w-full">
+        <TabsList>
+          <TabsTrigger className="cursor-pointer" value="pending">Pending Courses</TabsTrigger>
+          <TabsTrigger className="cursor-pointer" value="approved">ApprovedCourses</TabsTrigger>
+        </TabsList>
+        <TabsContent value="pending">
+          <PendingCourseTable/>
+        </TabsContent>
+        <TabsContent value="approved">
+          <ApprovedCourseTable />
+        </TabsContent>
+      </Tabs>
+
+    </main>
+  );
 }

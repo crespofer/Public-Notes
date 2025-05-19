@@ -14,6 +14,8 @@ import { ZodError } from "zod";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
+import { adminIds } from "~/consts/admins";
+
 /**
  * 1. CONTEXT
  *
@@ -131,3 +133,12 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+export const adminProcedure = protectedProcedure
+.use(timingMiddleware)
+.use(({ctx, next}) => {
+  if(!adminIds.has(ctx.session.user.id)) {
+    throw new TRPCError({code: "FORBIDDEN"});
+  }
+  return next();
+})
