@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import type { Course } from "@prisma/client";
 import { api } from "~/trpc/react";
 
 import {
@@ -20,14 +19,11 @@ import { Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 
 
-interface CourseTableProps {
-  courses: Course[];
-}
-
 const ITEMS_PER_PAGE = 10;
 
-export default function PendingCourseTable({ courses }: CourseTableProps) {
+export default function PendingCourseTable() {
   const [requestedPage, setRequestedPage] = useState(1);
+  const {data: courses, isLoading, error } = api.admin.getAllPendingCourses.useQuery();
 
   const denyCourse = api.admin.denyCourse.useMutation({
     onSuccess: (result) => {
@@ -90,7 +86,19 @@ export default function PendingCourseTable({ courses }: CourseTableProps) {
             </tr>
           </thead>
           <tbody>
-            {courses && courses.length > 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-center">
+                  Loading...
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-center text-red-500">
+                  Error loading courses
+                </td>
+              </tr>
+            ) : courses && courses.length > 0 ? (
               paginate(courses, requestedPage).map((course) => (
                 <tr key={course.id} className="border-t">
                   <td className="px-4 py-2">{course.name}</td>

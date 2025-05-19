@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 
 export default async function AdminDashboard() {
 
-  const pendingCourses = await api.admin.getAllPendingCourses();
   const approvedCourses = await api.admin.getAllApprovedCourses();
   
   return (
@@ -19,7 +18,7 @@ export default async function AdminDashboard() {
           <TabsTrigger className="cursor-pointer" value="approved">ApprovedCourses</TabsTrigger>
         </TabsList>
         <TabsContent value="pending">
-          <PendingCourseTable courses={pendingCourses}/>
+          <PendingCourseTable/>
         </TabsContent>
         <TabsContent value="approved">
           <ApprovedCourseTable courses={approvedCourses} />
