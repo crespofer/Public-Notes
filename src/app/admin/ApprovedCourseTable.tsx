@@ -1,16 +1,14 @@
 "use client";
 
-import type { Course } from "@prisma/client";
 import { useState } from "react";
-
-interface CourseTableProps {
-  courses: Course[];
-}
+import { api } from "~/trpc/react";
 
 const ITEMS_PER_PAGE = 10;
 
-export default function ApprovedCourseTable({ courses }: CourseTableProps) {
+export default function ApprovedCourseTable() {
   const [approvedPage, setApprovedPage] = useState(1);
+
+  const {data: courses, isLoading, error } = api.admin.getAllApprovedCourses.useQuery();
 
   const handleEdit = (id: string) => {
     console.log("Edit:", id);
@@ -58,7 +56,19 @@ export default function ApprovedCourseTable({ courses }: CourseTableProps) {
             </tr>
           </thead>
           <tbody>
-            {courses && courses.length > 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-center">
+                  Loading...
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan={4} className="py-4 text-center text-red-500">
+                  Error loading courses
+                </td>
+              </tr>
+            ) : courses && courses.length > 0 ? (
               paginate(courses, approvedPage).map((course) => (
                 <tr key={course.id} className="border-t">
                   <td className="px-4 py-2">{course.name}</td>

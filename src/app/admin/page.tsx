@@ -1,12 +1,9 @@
-import { api } from "~/trpc/server";
 import ApprovedCourseTable from "./ApprovedCourseTable";
 import PendingCourseTable from "./PendingCourseTable";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 
-export default async function AdminDashboard() {
-
-  const approvedCourses = await api.admin.getAllApprovedCourses();
+export default function AdminDashboard() {
   
   return (
     <main className="py- mx-auto max-w-6xl px-4 pt-15">
@@ -21,7 +18,7 @@ export default async function AdminDashboard() {
           <PendingCourseTable/>
         </TabsContent>
         <TabsContent value="approved">
-          <ApprovedCourseTable courses={approvedCourses} />
+          <ApprovedCourseTable />
         </TabsContent>
       </Tabs>
 
