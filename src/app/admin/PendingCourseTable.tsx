@@ -3,6 +3,19 @@
 import { useState } from "react";
 import type { Course } from "@prisma/client";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog"
+
+
 interface CourseTableProps {
   courses: Course[];
 }
@@ -78,12 +91,28 @@ export default function PendingCourseTable({ courses }: CourseTableProps) {
                     >
                       Approve
                     </button>
-                    <button
-                      onClick={() => handleDeny(course.id)}
-                      className="cursor-pointer rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
-                    >
-                      Deny
-                    </button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className="cursor-pointer rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600">
+                          Deny
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {`Are you sure you wan't to deny ${course.code.replace(/^([A-Z]{3})(\d{4})$/, "$1 $2")}`}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            remove this course from pending requests.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeny(course.id)} className="cursor-pointer">Continue</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </td>
                 </tr>
               ))
