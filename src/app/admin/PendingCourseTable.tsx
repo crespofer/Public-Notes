@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Course } from "@prisma/client";
+import { api } from "~/trpc/react";
 
 import {
   AlertDialog,
@@ -14,6 +15,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog"
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 
 interface CourseTableProps {
@@ -25,12 +29,22 @@ const ITEMS_PER_PAGE = 10;
 export default function PendingCourseTable({ courses }: CourseTableProps) {
   const [requestedPage, setRequestedPage] = useState(1);
 
+  const denyCourse = api.admin.denyCourse.useMutation({
+    onSuccess: (result) => {
+        toast.success(`${result.code.replace(/^([A-Z]{3})(\d{4})$/, "$1 $2")} successfully denied`);
+    },
+    onError: (error) => {
+        toast.error("Something went wrong");
+        console.error(error.message, error.data);
+    },
+  });
+
   const handleApprove = (id: string) => {
     console.log("Approved:", id);
   };
 
   const handleDeny = (id: string) => {
-    console.log("Denied:", id);
+    denyCourse.mutate({courseId: id});
   };
 
   const paginate = <T,>(data: T[], page: number) =>
@@ -108,8 +122,22 @@ export default function PendingCourseTable({ courses }: CourseTableProps) {
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeny(course.id)} className="cursor-pointer">Continue</AlertDialogAction>
+                          <AlertDialogCancel className="cursor-pointer">
+                            Cancel
+                          </AlertDialogCancel>
+                          {denyCourse.isPending ? (
+                            <Button disabled>
+                              <Loader2 className="animate-spin" />
+                              Loading...
+                            </Button>
+                          ) : (
+                            <AlertDialogAction
+                              onClick={() => handleDeny(course.id)}
+                              className="cursor-pointer"
+                            >
+                              Continue
+                            </AlertDialogAction>
+                          )}
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
