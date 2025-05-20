@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -17,6 +15,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { api } from "~/trpc/react";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   courseName: z.string().min(1).min(10).max(60),
@@ -30,18 +30,36 @@ export default function AdminCreateCourseForm() {
     resolver: zodResolver(formSchema),
   });
 
+  const createCourse = api.admin.createCourse.useMutation({
+    onSuccess: (result) => {
+      if (result.success) {
+        toast.success(`${result.createdCourse?.code} successfully created!`);
+      } else {
+        toast.error(result.message);
+      }
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      console.error(error.message, error.data);
+    },
+    onSettled: () => {
+      form.reset({
+        courseName: "",
+        coursePrefix: "",
+        courseCode: "",
+        courseUrl: "",
+      });
+    },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>,
-      );
-    } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
-    }
+    const capitalPrefix = values.coursePrefix.toUpperCase();
+    createCourse.mutate({
+      name: values.courseName,
+      prefix: capitalPrefix,
+      code: values.courseCode,
+      url: values.courseUrl,
+    });
   }
 
   return (
@@ -125,7 +143,16 @@ export default function AdminCreateCourseForm() {
             />
           </div>
         </div>
-        <Button className="cursor-pointer" type="submit">Submit</Button>
+        {createCourse.isPending ? (
+          <Button disabled>
+            <Loader2 className="animate-spin" />
+            Loading
+          </Button>
+        ) : (
+          <Button className="cursor-pointer" type="submit">
+            Submit
+          </Button>
+        )}
       </form>
     </Form>
   );
