@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
+import { Prisma } from '@prisma/client'
 
 export const adminRouter = createTRPCRouter({
   getAllApprovedCourses: adminProcedure.query(async ({ ctx }) => {
@@ -53,5 +54,35 @@ export const adminRouter = createTRPCRouter({
           })
 
           return approvedCourse;
+        }),
+
+        createCourse: adminProcedure
+        .input(z.object({
+          name: z.string(),
+          prefix: z.string(),
+          code: z.string(),
+          url: z.string(),
+        })).mutation(async ({ctx, input}) => {
+          try {
+            const fullCode = input.prefix + input.code;
+            const createdCourse = await ctx.db.course.create({
+              data: {
+                name: input.name,
+                code: fullCode,
+                url: input.url,
+                pending: false,
+              }
+            });
+            return {success: true, createdCourse: createdCourse};
+            
+          } catch (error) {
+            if(error instanceof Prisma.PrismaClientKnownRequestError) {
+              if(error.code === 'P2002') {
+                return {success: false, message: "Course already exists"};
+              }
+            }
+            throw error;            
+          }
+
         })
 });
