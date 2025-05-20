@@ -17,13 +17,14 @@ import {
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import ApproveButton from "~/components/ApproveButton";
 
 
 const ITEMS_PER_PAGE = 10;
 
 export default function PendingCourseTable() {
   const [requestedPage, setRequestedPage] = useState(1);
-  const {data: courses, isLoading, error } = api.admin.getAllPendingCourses.useQuery();
+  const {data: courses, isLoading, error, refetch } = api.admin.getAllPendingCourses.useQuery();
 
   const denyCourse = api.admin.denyCourse.useMutation({
     onSuccess: (result) => {
@@ -34,10 +35,6 @@ export default function PendingCourseTable() {
         console.error(error.message, error.data);
     },
   });
-
-  const handleApprove = (id: string) => {
-    console.log("Approved:", id);
-  };
 
   const handleDeny = (id: string) => {
     denyCourse.mutate({courseId: id});
@@ -107,12 +104,7 @@ export default function PendingCourseTable() {
                   </td>
                   <td className="px-4 py-2">{course.count}</td>
                   <td className="space-x-2 px-4 py-2">
-                    <button
-                      onClick={() => handleApprove(course.id)}
-                      className="cursor-pointer rounded bg-green-500 px-3 py-1 text-white hover:bg-green-600"
-                    >
-                      Approve
-                    </button>
+                    <ApproveButton course={course} refetch={refetch}/>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button className="cursor-pointer rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600">
