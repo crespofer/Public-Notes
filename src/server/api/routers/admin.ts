@@ -28,5 +28,30 @@ export const adminRouter = createTRPCRouter({
         where: {id: input.courseId},
       })
       return deniedCourse;
-    })
+    }),
+
+    approveCourse: adminProcedure
+      .input(z.object({
+        courseId: z.string(),
+        courseName: z.string(),
+        coursePrefix: z.string(),
+        courseCode: z.string(),
+        courseUrl: z.string(),
+        })).mutation(async ({ctx, input}) => {
+          const fullCode = input.coursePrefix + input.courseCode;
+
+          const approvedCourse = await ctx.db.course.update({
+            where: {
+              id: input.courseId,
+            },
+            data: {
+              name: input.courseName,
+              code: fullCode,
+              url: input.courseUrl,
+              pending: false,
+            }
+          })
+
+          return approvedCourse;
+        })
 });
