@@ -5,18 +5,15 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
 
-import { useState } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -29,6 +26,8 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import type { Course } from "@prisma/client";
+import { api } from "~/trpc/react";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   courseName: z.string().min(1).min(10).max(60),
@@ -46,20 +45,43 @@ interface ApproveButtonProps {
 export default function ApproveButton({course, refetch}: ApproveButtonProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+        courseName: course.name,
+        coursePrefix: course.code.slice(0, 3),
+        courseCode: course.code.slice(3),
+    }
+  });
+
+  const approveCourse = api.admin.approveCourse.useMutation({
+    onSuccess: (result) => {
+        toast.success(`${result.code} successfully approved!`);
+        refetch();
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      console.error(error.message, error.data);
+    },
+    onSettled: () => {
+        form.reset({
+            courseName: "",
+            courseCode: "",
+            coursePrefix: "",
+            courseUrl: "",
+        })
+    }
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>,
-      );
-    } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
-    }
+    const capitalPrefix = values.coursePrefix.toUpperCase();
+    approveCourse.mutate({
+        courseId: course.id,
+        courseName: values.courseName,
+        coursePrefix: values.coursePrefix,
+        courseCode: values.courseCode,
+        courseUrl: values.courseUrl,
+    });
+
+
   }
 
   return (
@@ -149,14 +171,21 @@ export default function ApproveButton({course, refetch}: ApproveButtonProps) {
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <Button className="cursor-pointer" type="submit">
-                Submit
-              </Button>
               <DialogClose asChild>
                 <Button type="button" className="cursor-pointer">
                   Close
                 </Button>
               </DialogClose>
+              {approveCourse.isPending ? (
+            <Button disabled>
+              <Loader2 className="animate-spin" />
+              Loading
+            </Button>
+              ) : (
+              <Button className="cursor-pointer" type="submit">
+                Submit
+              </Button>
+              )}
             </div>
           </form>
         </Form>
