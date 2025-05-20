@@ -76,7 +76,7 @@ export default function ApproveButton({course, refetch}: ApproveButtonProps) {
     approveCourse.mutate({
         courseId: course.id,
         courseName: values.courseName,
-        coursePrefix: values.coursePrefix,
+        coursePrefix: capitalPrefix,
         courseCode: values.courseCode,
         courseUrl: values.courseUrl,
     });
