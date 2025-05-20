@@ -39,13 +39,12 @@ export const courseRouter = createTRPCRouter({
             }
 
         } else { // course is awaiting review, add new request
-            const newCount = course.count + 1;
             const createdCourse = await ctx.db.course.update({
                 where: {
                     code: fullCode,
                 },
                 data: {
-                    count: newCount,
+                    count: {increment: 1}
                 },
             })
             return {
