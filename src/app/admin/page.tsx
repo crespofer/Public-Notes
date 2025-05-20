@@ -1,3 +1,4 @@
+import AdminCreateCourseForm from "~/components/AdminCreateCourseForm";
 import ApprovedCourseTable from "./ApprovedCourseTable";
 import PendingCourseTable from "./PendingCourseTable";
 
@@ -12,13 +13,17 @@ export default function AdminDashboard() {
       <Tabs defaultValue="pending" className="w-full">
         <TabsList>
           <TabsTrigger className="cursor-pointer" value="pending">Pending Courses</TabsTrigger>
-          <TabsTrigger className="cursor-pointer" value="approved">ApprovedCourses</TabsTrigger>
+          <TabsTrigger className="cursor-pointer" value="approved">Approved Courses</TabsTrigger>
+          <TabsTrigger className="cursor-pointer" value="create">Create Course</TabsTrigger>
         </TabsList>
         <TabsContent value="pending">
           <PendingCourseTable/>
         </TabsContent>
         <TabsContent value="approved">
           <ApprovedCourseTable />
+        </TabsContent>
+        <TabsContent value="create">
+          <AdminCreateCourseForm />
         </TabsContent>
       </Tabs>
 
