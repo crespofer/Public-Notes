@@ -84,5 +84,38 @@ export const adminRouter = createTRPCRouter({
             throw error;            
           }
 
-        })
+        }),
+
+        editCourse: adminProcedure
+        .input(z.object({
+          id: z.string(),
+          name: z.string(),
+          prefix: z.string(),
+          code: z.string(),
+          url: z.string(),
+        })).mutation(async ({ ctx, input }) => {
+          const fullCode = input.prefix + input.code;
+
+          try {
+            const updatedCourse = await ctx.db.course.update({
+              where: { id: input.id },
+              data: {
+                name: input.name,
+                code: fullCode,
+                url: input.url,
+              }
+            });
+            return {succes: true, updatedCourse: updatedCourse};
+            
+          } catch (error) {
+            if(error instanceof Prisma.PrismaClientKnownRequestError) {
+              if(error.code === 'P2002') {
+                return {succes: false, message: "Name or code already exists"};
+              }
+            }
+            throw error;
+          }
+        }),
+
+        
 });
