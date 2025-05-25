@@ -28,6 +28,7 @@ import { Input } from "~/components/ui/input";
 import type { Course } from "@prisma/client";
 import { api } from "~/trpc/react";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const formSchema = z.object({
   courseName: z.string().min(1).min(10).max(60),
@@ -37,58 +38,62 @@ const formSchema = z.object({
 });
 
 interface EditButtonProps {
-    course: Course;
-    refetch: () => void;
+  course: Course;
+  refetch: () => void;
 }
 
+export default function EditButton({ course, refetch }: EditButtonProps) {
+  const [open, setOpen] = useState(false);
 
-export default function EditButton({course, refetch}: EditButtonProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        courseName: course.name,
-        coursePrefix: course.code.slice(0, 3),
-        courseCode: course.code.slice(3),
-        courseUrl: course.url ? course.url : undefined,
-    }
+      courseName: course.name,
+      coursePrefix: course.code.slice(0, 3),
+      courseCode: course.code.slice(3),
+      courseUrl: course.url ? course.url : undefined,
+    },
   });
 
-  const approveCourse = api.admin.approveCourse.useMutation({
+  const editCourse = api.admin.editCourse.useMutation({
     onSuccess: (result) => {
-        toast.success(`${result.code} successfully edited!`);
+      if (result.succes) {
+        toast.success(`${result.updatedCourse?.code} successfully edited`);
         refetch();
+      } else {
+        toast.error(result.message);
+      }
     },
     onError: (error) => {
       toast.error("Something went wrong");
       console.error(error.message, error.data);
     },
     onSettled: () => {
-        form.reset({
-            courseName: "",
-            courseCode: "",
-            coursePrefix: "",
-            courseUrl: "",
-        })
-    }
+      form.reset({
+        courseName: "",
+        courseCode: "",
+        coursePrefix: "",
+        courseUrl: "",
+      });
+      setOpen(false);
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const capitalPrefix = values.coursePrefix.toUpperCase();
-    approveCourse.mutate({
-        courseId: course.id,
-        courseName: values.courseName,
-        coursePrefix: capitalPrefix,
-        courseCode: values.courseCode,
-        courseUrl: values.courseUrl,
+    editCourse.mutate({
+      id: course.id,
+      name: values.courseName,
+      prefix: capitalPrefix,
+      code: values.courseCode,
+      url: values.courseUrl,
     });
-
-
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="cursor-pointer rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600">
+        <button onClick={() => {setOpen(true)}} className="cursor-pointer rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600">
           Edit
         </button>
       </DialogTrigger>
@@ -177,15 +182,15 @@ export default function EditButton({course, refetch}: EditButtonProps) {
                   Close
                 </Button>
               </DialogClose>
-              {approveCourse.isPending ? (
-            <Button disabled>
-              <Loader2 className="animate-spin" />
-              Loading
-            </Button>
+              {editCourse.isPending ? (
+                <Button disabled>
+                  <Loader2 className="animate-spin" />
+                  Loading
+                </Button>
               ) : (
-              <Button className="cursor-pointer" type="submit">
-                Submit
-              </Button>
+                <Button className="cursor-pointer" type="submit">
+                  Submit
+                </Button>
               )}
             </div>
           </form>
