@@ -55,4 +55,12 @@ export const courseRouter = createTRPCRouter({
 
     }),
 
+    fetchCourses: publicProcedure
+    .query(async ({ ctx }) => {
+        const courses = await ctx.db.course.findMany({
+            where: { pending: false },
+        });
+        return courses;
+    }),
+
 });
