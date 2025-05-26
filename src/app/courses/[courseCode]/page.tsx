@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import NoteCard from "~/components/NoteCard";
 
-export default async function CoursePage({params}: {params: { courseCode: string }}) {
-  const { courseCode } = await params;
+type paramsType = Promise<{courseCode: string}>;
+
+export default async function CoursePage(props: { params: paramsType}) {
+  const { courseCode } = await props.params;
   const isValid = /^[A-Z]{3}\d{4}$/.test(courseCode);
 
   if (!isValid) {
