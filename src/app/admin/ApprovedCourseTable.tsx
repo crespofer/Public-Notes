@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import EditButton from "~/components/EditButton";
 import { api } from "~/trpc/react";
 
 const ITEMS_PER_PAGE = 10;
@@ -8,11 +9,7 @@ const ITEMS_PER_PAGE = 10;
 export default function ApprovedCourseTable() {
   const [approvedPage, setApprovedPage] = useState(1);
 
-  const {data: courses, isLoading, error } = api.admin.getAllApprovedCourses.useQuery();
-
-  const handleEdit = (id: string) => {
-    console.log("Edit:", id);
-  };
+  const {data: courses, isLoading, error, refetch } = api.admin.getAllApprovedCourses.useQuery();
 
   const paginate = <T,>(data: T[], page: number) =>
     data.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -76,12 +73,7 @@ export default function ApprovedCourseTable() {
                     {course.code.replace(/^([A-Z]{3})(\d{4})$/, "$1 $2")}
                   </td>
                   <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleEdit(course.id)}
-                      className="cursor-pointer rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
+                    <EditButton course={course} refetch={refetch} />
                   </td>
                 </tr>
               ))

@@ -10,7 +10,7 @@ import { Toaster } from "~/components/ui/sonner";
 export const metadata: Metadata = {
   title: "Public Notes",
   description: "Upload your Notes with Other Users!",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/logo.png" }],
 };
 
 const geist = Geist({

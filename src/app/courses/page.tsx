@@ -1,37 +1,10 @@
 import Link from "next/link";
 import CourseCard from "~/components/ui/CourseCard";
+import { api } from "~/trpc/server";
 
-const courses = [
-  {
-    name: "Calculus I",
-    code: "MATH101",
-    imageUrl: "/images/calculus.jpg",
-  },
-  {
-    name: "Introduction to Programming",
-    code: "CS100",
-    imageUrl: "/images/programming.jpg",
-  },
-  {
-    name: "Physics I",
-    code: "PHYS101",
-    imageUrl: "/images/physics.jpg",
-  },{
-    name: "Physics I",
-    code: "PHYS101",
-    imageUrl: "/images/physics.jpg",
-  },{
-    name: "Physics I",
-    code: "PHYS101",
-    imageUrl: "/images/physics.jpg",
-  },{
-    name: "Physics I",
-    code: "PHYS101",
-    imageUrl: "/images/physics.jpg",
-  },
-];
+export default async function CoursesPage() {
+  const courses = await api.course.fetchCourses();
 
-export default function CoursesPage() {
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 pt-15">
       <h1 className="text-3xl font-bold mb-6">Courses</h1>
@@ -42,7 +15,7 @@ export default function CoursesPage() {
             key={course.code}
             name={course.name}
             code={course.code}
-            imageUrl={course.imageUrl}
+            imageUrl={course.url}
           />
         ))}
       </div>
