@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import NoteCard from "~/components/NoteCard";
 
 export default async function CoursePage({params}: {params: { courseCode: string }}) {
   const { courseCode } = await params;
@@ -15,6 +16,13 @@ export default async function CoursePage({params}: {params: { courseCode: string
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 pt-15">
       <h1 className="mb-6 text-3xl font-bold">{courseCode}</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <NoteCard id="1" title="Lecture 1" createdAt=""/>
+      <NoteCard id="1" title="Lecture 1" createdAt=""/>
+      <NoteCard id="1" title="Lecture 1" createdAt=""/>
+      <NoteCard id="1" title="Lecture 1" createdAt=""/>
+
+      </div>
     </main>
   );
 }
