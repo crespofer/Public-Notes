@@ -51,7 +51,7 @@ export default function EditButton({ course, refetch }: EditButtonProps) {
       courseName: course.name,
       coursePrefix: course.code.slice(0, 3),
       courseCode: course.code.slice(3),
-      courseUrl: course.url ? course.url : undefined,
+      courseUrl: course.url ?? undefined,
     },
   });
 
