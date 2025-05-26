@@ -1,1 +1,1 @@
-export const adminIds = new Set([process.env.ADMIN_FER])
+export const adminIds = new Set([process.env.ADMIN_FER, process.env.ADMIN_DEV])
