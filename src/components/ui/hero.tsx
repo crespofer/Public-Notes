@@ -72,9 +72,11 @@ export const Hero = () => {
                 View Courses
               </Button>
             </Link>
-            <Button size="lg" className="cursor-pointer gap-4">
-              Upload Notes <Upload className="h-4 w-4" />
-            </Button>
+            <Link href="/upload">
+              <Button size="lg" className="cursor-pointer gap-4">
+                Upload Notes <Upload className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
