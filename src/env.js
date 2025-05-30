@@ -20,7 +20,7 @@ export const env = createEnv({
     ADMIN_DEV: z.string(),
     AWS_BUCKET_NAME: z.string(),
     AWS_BUCKET_REGION: z.string(),
-    AWS_ACCESS_KEY: z.string(),
+    AWS_BUCKET_ACCESS_KEY: z.string(),
     AWS_SECRET_ACCESS_KEY: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -52,7 +52,7 @@ export const env = createEnv({
     ADMIN_DEV: process.env.ADMIN_DEV,
     AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
     AWS_BUCKET_REGION: process.env.AWS_BUCKET_REGION,
-    AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY,
+    AWS_BUCKET_ACCESS_KEY: process.env.AWS_BUCKET_ACCESS_KEY,
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
   },
   /**
