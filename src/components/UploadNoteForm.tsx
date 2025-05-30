@@ -43,6 +43,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   const [files, setFiles] = useState<File[] | null>(null);
   const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
   const [uploadLoading, setUploadLoading] = useState<boolean>(false);
+
   const getSignedURL = api.note.getSignedURL.useMutation({
     onSuccess: (result) => {
       console.log(result.success);
@@ -52,6 +53,16 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
       console.error(error.message, error.data);
     },
   });
+
+  const computeSHA256 = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return hashHex;
+  };
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -65,12 +76,14 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setUploadLoading(true);
     try {
+      const checksum = await computeSHA256(values.noteFile);
       const result = await getSignedURL.mutateAsync({
         type: values.noteFile.type,
-        size: values.noteFile.size, 
+        size: values.noteFile.size,
+        checksum: checksum,
       });
-      
-      if(result.failure !== undefined) {
+
+      if (result.failure !== undefined) {
         throw new Error(result.failure);
       }
 

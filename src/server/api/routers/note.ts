@@ -20,8 +20,9 @@ export const noteRouter = createTRPCRouter({
     .input(z.object({
         type: z.string(),
         size: z.number(),
+        checksum: z.string(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
         if(!acceptedTypes.includes(input.type)) {
             return {failure: "Invalid file type"}
         }
@@ -30,11 +31,16 @@ export const noteRouter = createTRPCRouter({
             return {failure: "File too large"}
         }
 
+        // all this gets embedded into the url
         const putObjectCommand = new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME!,
             Key: "test-file",
             ContentType: input.type,
             ContentLength: input.size,
+            ChecksumSHA256: input.checksum,
+            Metadata: {
+                userId: ctx.session.user.id,
+            },
         })
 
         const signedUrl = await getSignedUrl(s3, putObjectCommand, {
