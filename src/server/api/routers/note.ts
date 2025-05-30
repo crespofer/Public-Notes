@@ -12,12 +12,29 @@ const s3 = new S3Client({
     },
 })
 
+const acceptedTypes = ["image/jpeg", "image/jpg", "application/pdf", "image/png"]
+const maxFileSize = 1024 * 1024  * 4;
+
 export const noteRouter = createTRPCRouter({
     getSignedURL: protectedProcedure
-    .mutation(async ({ ctx }) => {
+    .input(z.object({
+        type: z.string(),
+        size: z.number(),
+    }))
+    .mutation(async ({ input }) => {
+        if(!acceptedTypes.includes(input.type)) {
+            return {failure: "Invalid file type"}
+        }
+
+        if(input.size > maxFileSize) {
+            return {failure: "File too large"}
+        }
+
         const putObjectCommand = new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME!,
             Key: "test-file",
+            ContentType: input.type,
+            ContentLength: input.size,
         })
 
         const signedUrl = await getSignedUrl(s3, putObjectCommand, {

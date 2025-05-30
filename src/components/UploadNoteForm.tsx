@@ -65,7 +65,15 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setUploadLoading(true);
     try {
-      const result = await getSignedURL.mutateAsync();
+      const result = await getSignedURL.mutateAsync({
+        type: values.noteFile.type,
+        size: values.noteFile.size, 
+      });
+      
+      if(result.failure !== undefined) {
+        throw new Error(result.failure);
+      }
+
       const url = result.success.url;
 
       await fetch(url, {
@@ -75,7 +83,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
           "Content-type": values.noteFile.type,
         },
       });
-      
+
       //console.log(values.noteFile);
       //console.log(values);
       toast.success("File Uploaded!");
