@@ -40,6 +40,7 @@ const formSchema = z.object({
 
 export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   const [files, setFiles] = useState<File[] | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -100,7 +101,9 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
                 </FormControl>
                 <SelectContent>
                   {courses.map((course) => (
-                    <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -124,6 +127,17 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
                   onValueChange={(files) => {
                     setFiles(files);
                     field.onChange(files && files[0] ? files[0] : null);
+
+                    if (fileUrl) {
+                      URL.revokeObjectURL(fileUrl);
+                    }
+
+                    if (files && files[0]) {
+                      const url = URL.createObjectURL(files[0]);
+                      setFileUrl(url);
+                    } else {
+                      setFileUrl(undefined);
+                    }
                   }}
                   dropzoneOptions={dropZoneConfig}
                   className="bg-background relative rounded-lg p-2"
@@ -160,15 +174,19 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        {fileUrl && files && files[0] && (
+          <div className="my-6 flex justify-center">
+            <div className="flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-lg">
+              <img
+                className="h-full w-full object-cover"
+                src={fileUrl}
+                alt={files[0].name}
+              />
+            </div>
+          </div>
+        )}
+        <Button className="cursor-pointer" type="submit">Submit</Button>
       </form>
-      <button
-        onClick={() => {
-          console.log(files);
-        }}
-      >
-        CLick
-      </button>
     </Form>
   );
 }
