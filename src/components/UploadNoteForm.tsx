@@ -126,13 +126,13 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
                   value={files}
                   onValueChange={(files) => {
                     setFiles(files);
-                    field.onChange(files && files[0] ? files[0] : null);
+                    field.onChange(files?.[0] ?? null);
 
                     if (fileUrl) {
                       URL.revokeObjectURL(fileUrl);
                     }
 
-                    if (files && files[0]) {
+                    if (files?.[0]) {
                       const url = URL.createObjectURL(files[0]);
                       setFileUrl(url);
                     } else {
@@ -174,7 +174,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
             </FormItem>
           )}
         />
-        {fileUrl && files && files[0] && (
+        {fileUrl && files?.[0] && (
           <div className="my-6 flex justify-center">
             <div className="flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-lg">
               <img

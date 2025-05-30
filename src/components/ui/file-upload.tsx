@@ -179,6 +179,7 @@ export const FileUploader = forwardRef<
         onValueChange(newValues);
 
         if (rejectedFiles.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/prefer-for-of
           for (let i = 0; i < rejectedFiles.length; i++) {
             if (rejectedFiles[i]?.errors[0]?.code === "file-too-large") {
               toast.error(
