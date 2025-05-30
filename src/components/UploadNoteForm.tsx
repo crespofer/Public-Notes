@@ -31,6 +31,7 @@ import {
 } from "~/components/ui/file-upload";
 
 import type { Course } from "@prisma/client";
+import { api } from "~/trpc/react";
 
 const formSchema = z.object({
   noteTitle: z.string().min(1).min(5),
@@ -41,6 +42,15 @@ const formSchema = z.object({
 export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   const [files, setFiles] = useState<File[] | null>(null);
   const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
+  const getSignedURL = api.note.getSignedURL.useMutation({
+    onSuccess: (result) => {
+      console.log(result.success.url);
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      console.error(error.message, error.data);
+    },
+  });
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -52,9 +62,11 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    getSignedURL.mutate();
+
     try {
-      console.log(values.noteFile);
-      console.log(values);
+      //console.log(values.noteFile);
+      //console.log(values);
       toast(
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(values, null, 2)}</code>
