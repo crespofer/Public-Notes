@@ -18,6 +18,7 @@ export default function NoteCard({ id, title, createdAt }: NoteCardProps) {
             src={blurredNote}
             alt={`Preview of ${title}`}
             fill
+            sizes="(max-width: 768px) 100vw, 400px"
             className="object-cover group-hover:scale-105 transition-transform"
           />
         </div>

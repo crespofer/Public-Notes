@@ -1,5 +1,6 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import NoteCard from "~/components/NoteCard";
+import { auth } from "~/server/auth";
 
 type paramsType = Promise<{courseCode: string}>;
 
@@ -9,6 +10,11 @@ export default async function CoursePage(props: { params: paramsType}) {
 
   if (!isValid) {
     notFound();
+  }
+
+  const session = await auth();
+  if(!session) {
+    redirect("/api/auth/signin");
   }
 
   // const notes = trpc

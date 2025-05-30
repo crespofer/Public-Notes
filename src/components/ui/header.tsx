@@ -2,11 +2,9 @@ import { auth } from "~/server/auth";
 import { Button } from "./button";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "./navigation-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -18,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import Link from "next/link";
+import { adminIds } from "~/consts/admins";
 
 export const Header = async () => {
   const session = await auth();
@@ -80,11 +79,13 @@ export const Header = async () => {
               <DropdownMenuContent>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <Link href="/admin">
-                  <DropdownMenuItem className="cursor-pointer">
-                    Admin
-                  </DropdownMenuItem>
-                </Link>
+                {adminIds.has(session.user.id) && (
+                  <Link href="/admin">
+                    <DropdownMenuItem className="cursor-pointer">
+                      Admin
+                    </DropdownMenuItem>
+                  </Link>
+                )}
                 <Link href="/api/auth/signout">
                   <DropdownMenuItem className="cursor-pointer">
                     Log Out
