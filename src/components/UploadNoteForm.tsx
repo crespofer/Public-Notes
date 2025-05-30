@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -31,13 +30,15 @@ import {
   FileUploaderItem,
 } from "~/components/ui/file-upload";
 
+import type { Course } from "@prisma/client";
+
 const formSchema = z.object({
   noteTitle: z.string().min(1).min(5),
   noteCourse: z.string(),
   noteFile: z.any(),
 });
 
-export default function UploadNoteForm() {
+export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   const [files, setFiles] = useState<File[] | null>(null);
 
   const dropZoneConfig = {
@@ -98,9 +99,9 @@ export default function UploadNoteForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="m@example.com">m@example.com</SelectItem>
-                  <SelectItem value="m@google.com">m@google.com</SelectItem>
-                  <SelectItem value="m@support.com">m@support.com</SelectItem>
+                  {courses.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormDescription>
