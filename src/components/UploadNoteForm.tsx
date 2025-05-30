@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { CloudUpload, Paperclip } from "lucide-react";
+import { CloudUpload, Loader2, Paperclip } from "lucide-react";
 import {
   FileInput,
   FileUploader,
@@ -42,9 +42,10 @@ const formSchema = z.object({
 export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   const [files, setFiles] = useState<File[] | null>(null);
   const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
   const getSignedURL = api.note.getSignedURL.useMutation({
     onSuccess: (result) => {
-      console.log(result.success.url);
+      console.log(result.success);
     },
     onError: (error) => {
       toast.error("Something went wrong");
@@ -61,20 +62,28 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
     resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    getSignedURL.mutate();
-
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setUploadLoading(true);
     try {
+      const result = await getSignedURL.mutateAsync();
+      const url = result.success.url;
+
+      await fetch(url, {
+        method: "PUT",
+        body: values.noteFile,
+        headers: {
+          "Content-type": values.noteFile.type,
+        },
+      });
+      
       //console.log(values.noteFile);
       //console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>,
-      );
+      toast.success("File Uploaded!");
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
+    } finally {
+      setUploadLoading(false);
     }
   }
 
@@ -98,7 +107,6 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="noteCourse"
@@ -126,7 +134,6 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="noteFile"
@@ -197,7 +204,16 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
             </div>
           </div>
         )}
-        <Button className="cursor-pointer" type="submit">Submit</Button>
+        {uploadLoading ? (
+          <Button disabled>
+            <Loader2 className="animate-spin" />
+            Loading
+          </Button>
+        ) : (
+          <Button className="cursor-pointer" type="submit">
+            Submit
+          </Button>
+        )}
       </form>
     </Form>
   );
