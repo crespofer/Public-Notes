@@ -32,6 +32,7 @@ import {
 
 import type { Course } from "@prisma/client";
 import { api } from "~/trpc/react";
+import { redirect } from "next/navigation";
 
 const formSchema = z.object({
   noteTitle: z.string().min(1).min(5),
@@ -89,7 +90,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
         throw new Error(result.failure);
       }
 
-      const url = result.success.url;
+      const {url, note} = result.success;
 
       await fetch(url, {
         method: "PUT",
@@ -99,7 +100,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
         },
       });
 
-      toast.success("File Uploaded!");
+      redirect(`/notes/${note.id}`);
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");

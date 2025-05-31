@@ -57,17 +57,18 @@ export const noteRouter = createTRPCRouter({
             throw new Error("Failed to generate signed url");
         }
 
-        await ctx.db.note.create({
+        const note = await ctx.db.note.create({
             data: {
                 Title: input.title,
                 url: url,
                 fileType: input.type,
                 createdById: ctx.session.user.id,
                 courseId: input.courseId,
-            }
+            },
+            select: {id: true,}
         })
 
-        return {success: {url: signedUrl }}
+        return {success: {url: signedUrl, note: note }}
 
     }),
 
