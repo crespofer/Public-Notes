@@ -217,11 +217,19 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
         {fileUrl && files?.[0] && (
           <div className="my-6 flex justify-center">
             <div className="flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-lg">
-              <img
-                className="h-full w-full object-cover"
-                src={fileUrl}
-                alt={files[0].name}
-              />
+              {files[0].type === "application/pdf" ? (
+                <iframe
+                  src={fileUrl}
+                  title={files[0].name}
+                  className="h-full w-full"
+                />
+              ) : (
+                <img
+                  className="h-full w-full object-cover"
+                  src={fileUrl}
+                  alt={files[0].name}
+                />
+              )}
             </div>
           </div>
         )}
