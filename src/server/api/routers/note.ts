@@ -91,6 +91,16 @@ export const noteRouter = createTRPCRouter({
         })
 
         return notes;
+    }),
+
+    getNoteById: protectedProcedure
+    .input(z.object({id: z.string()}))
+    .query(async ({ctx, input}) => {
+        const note = await ctx.db.note.findUnique({
+            where: {id: input.id},
+        })
+
+        return note;
     })
 
 });
