@@ -32,6 +32,11 @@ export const Header = async () => {
       href: "/courses",
       description: "",
     },
+    {
+      title: "Upload",
+      href: "/upload",
+      description: "",
+    }
   ];
 
   return (
