@@ -71,4 +71,28 @@ export const noteRouter = createTRPCRouter({
 
     }),
 
+    getNotesByCourse: protectedProcedure
+    .input(z.object({code: z.string()}))
+    .query(async ({ctx, input}) => {
+        const notes = await ctx.db.course.findUnique({
+            where: {
+                code: input.code,
+            },
+            select: {
+                name: true,
+                notes: {
+                    select: {
+                        Title: true,
+                        url: true,
+                        fileType: true,
+                        createdAt: true,
+                        id: true,
+                    },
+                }
+            },
+        })
+
+        return notes;
+    })
+
 });
