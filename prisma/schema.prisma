@@ -79,7 +79,7 @@ model Note {
   Title       String
   createdAt   DateTime @default(now())
   url         String
-  //fileType    String
+  fileType    String
 
   createdBy   User     @relation(fields: [createdById], references: [id])
   createdById String
