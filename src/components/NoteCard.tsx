@@ -1,12 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import blurredNote from "../../public/blurredNote.png"
-//import { format } from "date-fns";
 
 type NoteCardProps = {
   id: string;
   title: string;
-  createdAt: string;
+  createdAt: Date;
 };
 
 export default function NoteCard({ id, title, createdAt }: NoteCardProps) {
@@ -24,8 +23,7 @@ export default function NoteCard({ id, title, createdAt }: NoteCardProps) {
         </div>
         <div className="p-4">
           <h2 className="text-md font-semibold text-gray-900 truncate">{title}</h2>
-          <p className="text-sm text-gray-500 mt-1">{"May 4, 2025, MMM d, yyyy"}</p>
-          {/* <p className="text-sm text-gray-500 mt-1">{format(new Date(createdAt), "MMM d, yyyy")}</p> */}
+          <p className="text-sm text-gray-500 mt-1">{createdAt.toLocaleDateString()}</p>
         </div>
       </div>
     </Link>
