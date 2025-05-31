@@ -32,7 +32,7 @@ import {
 
 import type { Course } from "@prisma/client";
 import { api } from "~/trpc/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   noteTitle: z.string().min(1).min(5),
@@ -44,6 +44,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   const [files, setFiles] = useState<File[] | null>(null);
   const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
   const [uploadLoading, setUploadLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   const getSignedURL = api.note.getSignedURL.useMutation({
     onSuccess: (result) => {
@@ -51,7 +52,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
     },
     onError: (error) => {
       toast.error("Something went wrong");
-      console.error(error.message, error.data);
+      console.error("Error uploading note:", error.message, error.data);
     },
   });
 
@@ -100,7 +101,7 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
         },
       });
 
-      redirect(`/notes/${note.id}`);
+      router.push(`/notes/${note.id}`)
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
