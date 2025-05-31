@@ -42,6 +42,8 @@ export default async function Dashboard() {
               title={note.Title}
               createdAt={note.createdAt}
               showDelete={true}
+              fileType={note.fileType}
+              url={note.url}
             />
           ))}
         </div>

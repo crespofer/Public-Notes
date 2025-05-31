@@ -51,6 +51,8 @@ return (
             title={note.Title}
             createdAt={note.createdAt}
             key={note.id}
+            fileType={note.fileType}
+            url={note.url}
           />
         ))}
       </div>
