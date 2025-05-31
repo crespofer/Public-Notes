@@ -83,8 +83,6 @@ export const noteRouter = createTRPCRouter({
                 notes: {
                     select: {
                         Title: true,
-                        url: true,
-                        fileType: true,
                         createdAt: true,
                         id: true,
                     },
