@@ -81,6 +81,8 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
         type: values.noteFile.type,
         size: values.noteFile.size,
         checksum: checksum,
+        title: values.noteTitle,
+        courseId: values.noteCourse,
       });
 
       if (result.failure !== undefined) {
@@ -97,8 +99,6 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
         },
       });
 
-      //console.log(values.noteFile);
-      //console.log(values);
       toast.success("File Uploaded!");
     } catch (error) {
       console.error("Form submission error", error);

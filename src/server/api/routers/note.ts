@@ -24,6 +24,8 @@ export const noteRouter = createTRPCRouter({
         type: z.string(),
         size: z.number(),
         checksum: z.string(),
+        title: z.string(),
+        courseId: z.string(),
     }))
     .mutation(async ({ ctx, input }) => {
         if(!acceptedTypes.includes(input.type)) {
@@ -49,6 +51,21 @@ export const noteRouter = createTRPCRouter({
         const signedUrl = await getSignedUrl(s3, putObjectCommand, {
             expiresIn: 60,
         });
+
+        const url = signedUrl.split("?")[0]
+        if(!url) {
+            throw new Error("Failed to generate signed url");
+        }
+
+        await ctx.db.note.create({
+            data: {
+                Title: input.title,
+                url: url,
+                fileType: input.type,
+                createdById: ctx.session.user.id,
+                courseId: input.courseId,
+            }
+        })
 
         return {success: {url: signedUrl }}
 
