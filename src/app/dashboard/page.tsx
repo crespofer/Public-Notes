@@ -30,7 +30,7 @@ export default async function Dashboard() {
             />
           </svg>
           <span className="text-lg font-medium">
-            You haven't uploaded any notes yet.
+            {"You haven't uploaded any notes yet."}
           </span>
         </div>
       ) : (
