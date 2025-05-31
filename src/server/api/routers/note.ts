@@ -86,6 +86,8 @@ export const noteRouter = createTRPCRouter({
                         Title: true,
                         createdAt: true,
                         id: true,
+                        fileType: true,
+                        url: true,
                     },
                 }
             },
