@@ -101,6 +101,20 @@ export const noteRouter = createTRPCRouter({
         })
 
         return note;
+    }),
+
+    getUserNotes: protectedProcedure
+    .query(async ({ctx}) => {
+        const notes = await ctx.db.note.findMany({
+            where: {
+                createdById: ctx.session.user.id,
+            },
+            orderBy: {
+                createdAt: "desc",
+            }
+        })
+
+        return notes;
     })
 
 });
