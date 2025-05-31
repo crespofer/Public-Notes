@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument */
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { CloudUpload, Paperclip } from "lucide-react";
+import { CloudUpload, Loader2, Paperclip } from "lucide-react";
 import {
   FileInput,
   FileUploader,
@@ -31,6 +32,8 @@ import {
 } from "~/components/ui/file-upload";
 
 import type { Course } from "@prisma/client";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   noteTitle: z.string().min(1).min(5),
@@ -41,6 +44,28 @@ const formSchema = z.object({
 export default function UploadNoteForm({ courses }: { courses: Course[] }) {
   const [files, setFiles] = useState<File[] | null>(null);
   const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
+  const router = useRouter();
+
+  const getSignedURL = api.note.getSignedURL.useMutation({
+    onSuccess: (result) => {
+      console.log(result.success);
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      console.error("Error uploading note:", error.message, error.data);
+    },
+  });
+
+  const computeSHA256 = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return hashHex;
+  };
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -51,18 +76,38 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
     resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setUploadLoading(true);
     try {
-      console.log(values.noteFile);
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>,
-      );
+      const checksum = await computeSHA256(values.noteFile);
+      const result = await getSignedURL.mutateAsync({
+        type: values.noteFile.type,
+        size: values.noteFile.size,
+        checksum: checksum,
+        title: values.noteTitle,
+        courseId: values.noteCourse,
+      });
+
+      if (result.failure !== undefined) {
+        throw new Error(result.failure);
+      }
+
+      const {url, note} = result.success;
+
+      await fetch(url, {
+        method: "PUT",
+        body: values.noteFile,
+        headers: {
+          "Content-type": values.noteFile.type,
+        },
+      });
+
+      router.push(`/notes/${note.id}`)
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
+    } finally {
+      setUploadLoading(false);
     }
   }
 
@@ -86,7 +131,6 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="noteCourse"
@@ -114,7 +158,6 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="noteFile"
@@ -177,15 +220,32 @@ export default function UploadNoteForm({ courses }: { courses: Course[] }) {
         {fileUrl && files?.[0] && (
           <div className="my-6 flex justify-center">
             <div className="flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-lg">
-              <img
-                className="h-full w-full object-cover"
-                src={fileUrl}
-                alt={files[0].name}
-              />
+              {files[0].type === "application/pdf" ? (
+                <iframe
+                  src={fileUrl}
+                  title={files[0].name}
+                  className="h-full w-full"
+                />
+              ) : (
+                <img
+                  className="h-full w-full object-cover"
+                  src={fileUrl}
+                  alt={files[0].name}
+                />
+              )}
             </div>
           </div>
         )}
-        <Button className="cursor-pointer" type="submit">Submit</Button>
+        {uploadLoading ? (
+          <Button disabled>
+            <Loader2 className="animate-spin" />
+            Loading
+          </Button>
+        ) : (
+          <Button className="cursor-pointer" type="submit">
+            Submit
+          </Button>
+        )}
       </form>
     </Form>
   );

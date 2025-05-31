@@ -32,6 +32,11 @@ export const Header = async () => {
       href: "/courses",
       description: "",
     },
+    {
+      title: "Upload",
+      href: "/upload",
+      description: "",
+    }
   ];
 
   return (
@@ -58,9 +63,11 @@ export const Header = async () => {
           <p className="font-semibold">Public Notes</p>
         </div>
         <div className="flex w-full justify-end gap-4">
-          <Button variant="ghost" className="cursor-pointer md:inline">
-            My Notes
-          </Button>
+          <Link href="/dashboard">
+            <Button variant="ghost" className="cursor-pointer md:inline">
+              My Notes
+            </Button>
+          </Link>
           <div className="hidden border-r md:inline"></div>
 
           {session ? (
