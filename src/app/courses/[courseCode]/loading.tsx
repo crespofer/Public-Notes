@@ -5,7 +5,7 @@ export default function Loading() {
     <main className="mx-auto max-w-7xl px-4 py-8 pt-15">
       <h1 className="mb-6 text-3xl font-bold"></h1>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-        {[...Array(6)].map((_, i) => (
+        {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="flex flex-col overflow-hidden rounded-2xl bg-white shadow">
             <div className="relative h-48 w-full bg-gray-100">
               <Skeleton className="h-full w-full" />
