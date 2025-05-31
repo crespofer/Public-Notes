@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 
@@ -116,6 +116,32 @@ export const noteRouter = createTRPCRouter({
         })
 
         return notes;
+    }),
+
+    deleteNote: protectedProcedure
+    .input(z.object({noteId: z.string()}))
+    .mutation(async ({ctx, input}) => {
+        const note = await ctx.db.note.findUnique({
+            where: {
+                id: input.noteId,
+                createdById: ctx.session.user.id,
+            }
+        })
+
+        if(!note) {
+            return {failure: "Note not found"}
+        }
+
+        const deletedNote = await ctx.db.note.delete({
+            where: {id: input.noteId}
+        })
+
+        const deleteObjectCommand = new DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME!,
+            Key: deletedNote.url.split("/").pop()!,
+        })
+
+        await s3.send(deleteObjectCommand);
     })
 
 });
