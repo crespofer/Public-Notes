@@ -90,6 +90,7 @@ model Note {
 
 model Course {
   id       String  @id @default(cuid())
+  createdAt DateTime @default(now())
   name     String  @unique // Calculus 2
   code     String  @unique // MAC2312
   url      String?
